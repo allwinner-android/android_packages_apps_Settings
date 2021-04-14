@@ -32,6 +32,7 @@ import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import com.android.settings.R;
@@ -50,7 +51,7 @@ import static android.os.UserManager.DISALLOW_CONFIG_BLUETOOTH;
  * Bluetooth device in the Bluetooth Settings screen.
  */
 public final class BluetoothDevicePreference extends Preference implements
-        CachedBluetoothDevice.Callback, OnClickListener {
+        CachedBluetoothDevice.Callback, OnClickListener, View.OnKeyListener {
     private static final String TAG = "BluetoothDevicePreference";
 
     private static int sDimAlpha = Integer.MIN_VALUE;
@@ -163,6 +164,9 @@ public final class BluetoothDevicePreference extends Preference implements
             if (deviceDetails != null) {
                 deviceDetails.setOnClickListener(this);
                 deviceDetails.setTag(mCachedDevice);
+
+                view.itemView.setOnKeyListener(this);
+                view.itemView.setTag(mCachedDevice);
             }
         }
         final ImageView imageView = (ImageView) view.findViewById(android.R.id.icon);
@@ -177,6 +181,20 @@ public final class BluetoothDevicePreference extends Preference implements
         if (mOnSettingsClickListener != null) {
             mOnSettingsClickListener.onClick(v);
         }
+    }
+
+    @Override
+    public boolean onKey(View view, int keyCode, KeyEvent key) {
+        Log.v(TAG, "key code: " + key.getKeyCode());
+
+        if (key.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
+            if (key.getAction() == KeyEvent.ACTION_DOWN) {
+                if (mOnSettingsClickListener != null) {
+                    mOnSettingsClickListener.onClick(view);
+                }
+            }
+        }
+        return false;
     }
 
     @Override

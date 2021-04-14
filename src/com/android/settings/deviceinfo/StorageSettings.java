@@ -219,7 +219,7 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
             getPreferenceScreen().addPreference(mExternalCategory);
         }
 
-        if (mInternalCategory.getPreferenceCount() == 2
+        /*if (mInternalCategory.getPreferenceCount() == 2
                 && mExternalCategory.getPreferenceCount() == 0) {
             // Only showing primary internal storage, so just shortcut
             final Bundle args = new Bundle();
@@ -230,7 +230,7 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
             intent.putExtra(SettingsDrawerActivity.EXTRA_SHOW_MENU, true);
             getActivity().startActivity(intent);
             finish();
-        }
+        }*/
     }
 
     @Override
@@ -273,16 +273,16 @@ public class StorageSettings extends SettingsPreferenceFragment implements Index
                 return true;
 
             } else if (vol.getType() == VolumeInfo.TYPE_PUBLIC) {
-                if (vol.isMountedReadable()) {
+                /*if (vol.isMountedReadable()) {
                     startActivity(vol.buildBrowseIntent());
                     return true;
-                } else {
+                } else {*/
                     final Bundle args = new Bundle();
                     args.putString(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
                     startFragment(this, PublicVolumeSettings.class.getCanonicalName(),
                             -1, 0, args);
                     return true;
-                }
+               // }
             }
 
         } else if (key.startsWith("disk:")) {

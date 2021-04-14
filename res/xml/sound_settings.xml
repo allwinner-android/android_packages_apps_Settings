@@ -44,6 +44,16 @@
                 android:icon="@*android:drawable/ic_audio_ring_notif"
                 android:title="@string/notification_volume_option_title" />
 
+        <Preference
+                android:key="audio_output_mode"
+                android:title="@string/audio_output_mode_title"/>
+
+        <CheckBoxPreference
+                android:key="enable_pass_through"
+                android:title="@string/enable_pass_through"
+                android:summary="@string/enable_pass_through_summary"
+                android:persistent="false" />
+
         <!-- Also vibrate for calls -->
         <SwitchPreference
                 android:key="vibrate_when_ringing"
@@ -90,12 +100,12 @@
                         android:targetClass="com.android.cellbroadcastreceiver.CellBroadcastSettings" />
         </com.android.settingslib.RestrictedPreference>
 
-        <!-- Other sounds -->
+        <!-- Other sounds
         <Preference
                 android:key="other_sounds"
                 android:title="@string/other_sound_settings"
                 android:persistent="false"
-                android:fragment="com.android.settings.notification.OtherSoundSettings" />
+                android:fragment="com.android.settings.notification.OtherSoundSettings" /> -->
 
         <!-- Cast -->
         <PreferenceScreen

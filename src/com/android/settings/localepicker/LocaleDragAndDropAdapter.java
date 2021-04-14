@@ -257,8 +257,9 @@ class LocaleDragAndDropAdapter
     }
 
     void addLocale(LocaleStore.LocaleInfo li) {
+        mFeedItemList.clear();
         mFeedItemList.add(li);
-        notifyItemInserted(mFeedItemList.size() - 1);
+        //notifyItemInserted(mFeedItemList.size() - 1);
         doTheUpdate();
     }
 

@@ -19,12 +19,13 @@
         android:title="@string/display_settings"
         settings:keywords="@string/keywords_display">
 
+	<!-- Hide brightness mode for TV
         <PreferenceScreen
                 android:key="brightness"
                 android:title="@string/brightness"
                 settings:keywords="@string/keywords_display_brightness_level">
             <intent android:action="android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
-        </PreferenceScreen>
+        </PreferenceScreen> -->
 
         <SwitchPreference
                 android:key="auto_brightness"
@@ -52,8 +53,8 @@
                 android:key="screen_timeout"
                 android:title="@string/screen_timeout"
                 android:summary="@string/screen_timeout_summary"
-                android:entries="@array/screen_timeout_entries"
-                android:entryValues="@array/screen_timeout_values" />
+                android:entries="@array/dream_timeout_entries"
+                android:entryValues="@array/dream_timeout_values" />
 
         <SwitchPreference
                 android:key="camera_gesture"
@@ -110,5 +111,32 @@
                 android:key="vr_display_pref"
                 android:summary="%s"
                 android:title="@string/display_vr_pref_title" />
+
+        <ListPreference
+            android:key="hdmi_output_mode"
+            android:title="@string/hdmi_output_mode"
+            android:summary="@string/hdmi_output_mode_summary"
+            android:persistent="false"
+            android:entries="@*android:array/support_tv_format_entries_hdmi"
+						android:entryValues="@*android:array/support_tv_format_values_hdmi" />
+
+        <ListPreference
+            android:key="display_output_mode"
+            android:title="@string/display_output_mode_title"
+            android:summary="@string/display_output_mode_summary"
+            android:persistent="false"
+            android:entries="@*android:array/support_tv_format_entries_av"
+            android:entryValues="@*android:array/support_tv_format_values_av"/>
+
+        <com.android.settings.DisplayPercentPreference
+            android:key = "tv_screen_percent"
+            android:title = "@string/tv_screen_percent_title"
+            android:summary = "@string/tv_screen_percent_summary"/>
+
+        <PreferenceScreen
+                android:key="pip_screen_set"
+                android:title="@string/pip_screen_set_title"
+                android:summary="@string/pip_screen_set_summary"
+                android:fragment="com.android.settings.pipSettings.PipSettings"/>
 
 </PreferenceScreen>

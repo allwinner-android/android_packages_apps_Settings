@@ -19,7 +19,12 @@ package com.android.settings;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.UiModeManager;
+import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.WallpaperManager;
+import android.os.AsyncTask;
+import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,6 +39,8 @@ import android.os.Bundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.hardware.display.DisplayManager;
+import android.os.DisplayOutputManager;
 import android.provider.SearchIndexableResource;
 import android.provider.Settings;
 import android.support.v14.preference.SwitchPreference;
@@ -43,7 +50,12 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 import android.text.TextUtils;
 import android.util.Log;
-
+import android.widget.Toast;
+import android.view.IWindowManager;
+import android.view.Display;
+import android.os.ServiceManager;
+import android.util.AndroidException;
+import android.os.RemoteException;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.view.RotationPolicy;
@@ -75,7 +87,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
     /** If there is no setting in the provider, use this. */
     private static final int FALLBACK_SCREEN_TIMEOUT_VALUE = 30000;
-
+		private static final int FALLBACK_DISPLAY_MODE_TIMEOUT = 10;
     private static final String KEY_SCREEN_TIMEOUT = "screen_timeout";
     private static final String KEY_FONT_SIZE = "font_size";
     private static final String KEY_SCREEN_SAVER = "screensaver";
@@ -90,8 +102,22 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             = "camera_double_tap_power_gesture";
     private static final String KEY_WALLPAPER = "wallpaper";
     private static final String KEY_VR_DISPLAY_PREF = "vr_display_pref";
+    private DisplayOutputManager mDisplayManager;
+    private static final String KEY_TV_OUTPUT_MODE = "display_output_mode";
+    private static final String KEY_HDMI_OUTPUT_MODE = "hdmi_output_mode";
+    private static final String KEY_HDMI_OUTPUT_MODE_720P = "hdmi_output_mode_720p";
+    private static final String KEY_COLOR_SETTING_CATE = "display_color_setting_cate";
+    private static final String KEY_DISPLAY_OUTPUT_MODE_CATE = "display_output_mode_cate";
 
+    //yangtingrui add begin
+    private static final String KEY_PIP_SCREEN_SET = "pip_screen_set";
+    //yangtingrui add end
+
+    private static final int DLG_GLOBAL_CHANGE_WARNING = 1;
+    private static final int DLG_RESOLUTION_CHANGE_WARNING = 11;
     private Preference mFontSizePref;
+    private ListPreference mOutputMode;
+    private ListPreference mHdmiOutputModePreference;
 
     private TimeoutListPreference mScreenTimeoutPreference;
     private ListPreference mNightModePreference;
@@ -103,6 +129,17 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private SwitchPreference mCameraGesturePreference;
     private SwitchPreference mCameraDoubleTapPowerGesturePreference;
 
+    // yangtingrui add begin
+    private Preference mPipSetPreference=null;
+    // yangtingrui add end
+
+    private boolean isSupport = false;
+    private boolean isSameMode = false;
+
+    private String oldValue;
+    private String newValue;
+    private int format = 0;
+    private boolean dialogTipsFlag;
     @Override
     protected int getMetricsCategory() {
         return MetricsEvent.DISPLAY;
@@ -126,6 +163,8 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         mScreenTimeoutPreference = (TimeoutListPreference) findPreference(KEY_SCREEN_TIMEOUT);
 
         mFontSizePref = findPreference(KEY_FONT_SIZE);
+        mHdmiOutputModePreference = (ListPreference)findPreference(KEY_HDMI_OUTPUT_MODE);
+        mOutputMode = (ListPreference)findPreference(KEY_SCREEN_TIMEOUT);
 
         if (isAutomaticBrightnessAvailable(getResources())) {
             mAutoBrightnessPreference = (SwitchPreference) findPreference(KEY_AUTO_BRIGHTNESS);
@@ -169,6 +208,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         } else {
             removePreference(KEY_CAMERA_DOUBLE_TAP_POWER_GESTURE);
         }
+	removePreference(KEY_CAMERA_DOUBLE_TAP_POWER_GESTURE);
 
         if (RotationPolicy.isRotationLockToggleVisible(activity)) {
             DropDownPreference rotatePreference =
@@ -209,7 +249,14 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         } else {
             removePreference(KEY_AUTO_ROTATE);
         }
-
+        mDisplayManager = (DisplayOutputManager)getActivity().getSystemService(
+                Context.DISPLAYOUTPUT_SERVICE);
+        mOutputMode = (ListPreference) findPreference(KEY_TV_OUTPUT_MODE);
+	if(mOutputMode!=null){
+		format = mDisplayManager.getDisplayOutput(android.view.Display.TYPE_BUILT_IN);
+		Log.d(TAG,"format = " + format);
+		mOutputMode.setValue(Integer.toHexString(format));
+	}
         if (isVrDisplayModeAvailable(activity)) {
             DropDownPreference vrDisplayPref =
                     (DropDownPreference) findPreference(KEY_VR_DISPLAY_PREF);
@@ -252,6 +299,15 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             mNightModePreference.setValue(String.valueOf(currentNightMode));
             mNightModePreference.setOnPreferenceChangeListener(this);
         }
+
+
+        mPipSetPreference =  findPreference(KEY_PIP_SCREEN_SET);
+        if (null != mPipSetPreference)
+        {
+            mPipSetPreference.setOnPreferenceChangeListener(this);
+
+        }
+
     }
 
     private static boolean allowAllRotations(Context context) {
@@ -315,7 +371,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
                 int best = 0;
                 for (int i = 0; i < values.length; i++) {
                     long timeout = Long.parseLong(values[i].toString());
-                    if (currentTimeout >= timeout) {
+                    if (currentTimeout == timeout) {
                         best = i;
                     }
                 }
@@ -334,6 +390,14 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
                 SCREEN_OFF_TIMEOUT, FALLBACK_SCREEN_TIMEOUT_VALUE);
         mScreenTimeoutPreference.setValue(String.valueOf(currentTimeout));
         mScreenTimeoutPreference.setOnPreferenceChangeListener(this);
+
+        mHdmiOutputModePreference.setOnPreferenceChangeListener(this);
+        mOutputMode.setOnPreferenceChangeListener(this);
+        int dipslayOutput = mDisplayManager.getDisplayOutput(android.view.Display.TYPE_BUILT_IN);
+	Log.d(TAG,"displayOutput = " + Integer.toHexString(dipslayOutput));
+        mHdmiOutputModePreference.setValue(Integer.toHexString(dipslayOutput));
+        mOutputMode.setValue(Integer.toHexString(dipslayOutput));
+
         final DevicePolicyManager dpm = (DevicePolicyManager) getActivity().getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm != null) {
@@ -439,6 +503,25 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             boolean value = (Boolean) objValue;
             Settings.Secure.putInt(getContentResolver(), DOUBLE_TAP_TO_WAKE, value ? 1 : 0);
         }
+        Log.d("Settings","key  = " + key);
+        if (KEY_TV_OUTPUT_MODE.equals(key) || KEY_HDMI_OUTPUT_MODE.equals(key)) {
+	    format  = mDisplayManager.getDisplayOutput(android.view.Display.TYPE_BUILT_IN);
+	    oldValue = Integer.toHexString(format);
+            newValue = (String)objValue;
+            isSameMode = oldValue.equals(newValue);
+	    Log.d("Settings","new value = " + newValue);
+            if(isSameMode)
+                return true;
+            // do not switch to hdmi output when it's plug out!
+            if (!canSwitchToNewOutputType(Integer.parseInt(oldValue, 16), Integer.parseInt(newValue, 16)))
+                return false;
+            dialogTipsFlag = true;
+            switchDispFormat(newValue);
+            if(dialogTipsFlag){
+                showDialog(DLG_RESOLUTION_CHANGE_WARNING);
+            }
+
+	}
         if (preference == mCameraGesturePreference) {
             boolean value = (Boolean) objValue;
             Settings.Secure.putInt(getContentResolver(), CAMERA_GESTURE_DISABLED,
@@ -462,11 +545,173 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         return true;
     }
 
+    private boolean canSwitchToNewOutputType(int oldFormat, int newFormat) {
+        int newType = (newFormat & 0xff00) >> 8;
+        int mCurType = mDisplayManager.getDisplayOutputType(android.view.Display.TYPE_BUILT_IN);
+
+        Log.e(TAG, "current output type: " + mCurType + " new ouput type: " + newType);
+        if (mCurType != newType)
+            return false;
+
+        return true;
+    }
+    private void switchDispFormat(String value) {
+	    Log.d(TAG,"switchDispFormat value = " + value);
+	    try {
+	        format = Integer.parseInt(value, 16);
+            int dispformat = mDisplayManager.getDisplayModeFromFormat(format);
+            int mCurType = mDisplayManager.getDisplayOutputType(android.view.Display.TYPE_BUILT_IN);
+            IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.checkService(
+                        Context.WINDOW_SERVICE));
+            int setDispOutputOk = 0;
+            int w = 0;
+            int h = 0;
+            int density = 0;
+
+            isSupport = true;
+            if(isSupport){
+                Log.w(TAG, "dm set output format:"+format);
+                setDispOutputOk = mDisplayManager.setDisplayOutput(android.view.Display.TYPE_BUILT_IN, format);
+                Log.w(TAG, "setDisplayOutput return "+setDispOutputOk);
+                if(setDispOutputOk == -1 && dialogTipsFlag){
+                    dialogTipsFlag = !dialogTipsFlag;
+                    Dialog alertDialog = new AlertDialog.Builder(this.getActivity())
+                        .setTitle(this.getResources().getString(R.string.display_support_type_title))
+                        .setMessage(this.getResources().getString(R.string.display_support_type))
+                        .setPositiveButton(
+                                this.getResources().getString(R.string.assistant_security_warning_agree),
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                                        switchDispFormat(oldValue);
+                                        return ;
+                                    }
+                                }).create();
+                    alertDialog.show();
+                }
+
+                mOutputMode.setValue(value);
+		if(mHdmiOutputModePreference!=null)
+		mHdmiOutputModePreference.setValue(value);
+                if(0xFF == setDispOutputOk) {
+                    switch(dispformat) {
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_3840_2160P_30HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_3840_2160P_25HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_3840_2160P_24HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_1080P_50HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_1080P_60HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_1080I_60HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_1080I_50HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_1080P_24HZ:
+                        w = 1920;
+                        h = 1080;
+                        density = 240;
+                        break;
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_720P_50HZ:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_720P_60HZ:
+                        w = 1280;
+                        h = 720;
+                        density = 160;
+                        break;
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_576P:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_576I:
+                        w = 720;
+                        h = 576;
+                        density = 128;
+                        break;
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_480P:
+                    case DisplayOutputManager.DISPLAY_TVFORMAT_480I:
+                        w = 720;
+                        h = 480;
+                        density = 106;
+                        break;
+                    default:
+                        setDispOutputOk = 1;
+                    }
+                }
+                if(0xFF == setDispOutputOk) {
+                    if (wm == null) {
+                        Log.e(TAG,"wm is null!");
+                    }
+                    try{
+                        wm.setForcedDisplaySize(android.view.Display.DEFAULT_DISPLAY, w, h);
+                        wm.setForcedDisplayDensity(android.view.Display.DEFAULT_DISPLAY, density);
+                    }catch(RemoteException e){
+                        Log.d(TAG,"call setForcedDisplaySize error");
+                    }
+                }
+            }else {
+                Toast.makeText(getActivity(), com.android.settings.R.string.display_mode_unsupport,Toast.LENGTH_LONG).show();
+            }
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Invalid display output format!");
+        }
+    }    
     @Override
     protected int getHelpResource() {
         return R.string.help_uri_display;
     }
+    
+    @Override
+    public Dialog onCreateDialog(int dialogId) {
+        if (DLG_RESOLUTION_CHANGE_WARNING == dialogId) {
+            OnClickListener listener = new OnClickListener() {
+                @Override
+                    public void onClick(DialogInterface dialog, int btn) {
+                        if (btn == AlertDialog.BUTTON_POSITIVE) {
+                            switchDispFormat(newValue);
+                        } else if (btn == AlertDialog.BUTTON_NEGATIVE) {
+                            switchDispFormat(oldValue);
+                        }
+                        dialog.dismiss();
+                    }
+            };
 
+            String str = getString(com.android.settings.R.string.display_mode_time_out_desc);
+            final AlertDialog dialog = new AlertDialog.Builder(this.getActivity())
+				.setTitle(com.android.settings.R.string.display_mode_time_out_title)
+				.setMessage(String.format(str, Integer.toString(FALLBACK_DISPLAY_MODE_TIMEOUT)))
+				.setPositiveButton(com.android.internal.R.string.ok, listener)
+				.setNegativeButton(com.android.internal.R.string.cancel, listener)
+				.create();
+            dialog.show();
+
+            new AsyncTask(){
+                @Override
+                    protected Object doInBackground(Object... arg0) {
+                        int time = FALLBACK_DISPLAY_MODE_TIMEOUT;
+                        while(time >= 0 && dialog.isShowing()){
+                            publishProgress(time);
+                            try{
+                                Thread.sleep(1000);
+                            }catch(Exception e){}
+                            time--;
+                        }
+                        return null;
+                    }
+                @Override
+                    protected void onPostExecute(Object result) {
+                        super.onPostExecute(result);
+                        if (dialog.isShowing()) {
+                            Log.d(TAG,"oldValue = " + oldValue);
+                            switchDispFormat(oldValue);
+                            dialog.dismiss();
+                        }
+                    }
+                @Override
+                    protected void onProgressUpdate(Object... values) {
+                        super.onProgressUpdate(values);
+                        int time = (Integer)values[0];
+                        String str = getString(com.android.settings.R.string.display_mode_time_out_desc);
+                        dialog.setMessage(String.format(str, Integer.toString(time)));
+                    }
+            }.execute();
+            return dialog;
+        }
+        return null;
+    }
+    
     private void disablePreferenceIfManaged(String key, String restriction) {
         final RestrictedPreference pref = (RestrictedPreference) findPreference(key);
         if (pref != null) {

@@ -53,6 +53,7 @@ public class DashboardSummary extends InstrumentedFragment
 
     public static final String[] INITIAL_ITEMS = new String[] {
             Settings.WifiSettingsActivity.class.getName(),
+            Settings.EthernetSettingsActivity.class.getName(),
             Settings.BluetoothSettingsActivity.class.getName(),
             Settings.DataUsageSummaryActivity.class.getName(),
             Settings.PowerUsageSummaryActivity.class.getName(),

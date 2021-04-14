@@ -110,7 +110,6 @@ public class WifiSetupActivity extends WifiPickerActivity
         super.onRestoreInstanceState(savedInstanceState);
         mUserSelectedNetwork = savedInstanceState.getBoolean(PARAM_USER_SELECTED_NETWORK, true);
     }
-
     private boolean isWifiConnected() {
         final ConnectivityManager connectivity = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -121,7 +120,7 @@ public class WifiSetupActivity extends WifiPickerActivity
     }
 
     private void refreshConnectionState() {
-        if (isWifiConnected()) {
+		if (isWifiConnected()) {
             if (mAutoFinishOnConnection && mUserSelectedNetwork) {
                 Log.d(TAG, "Auto-finishing with connection");
                 finish(Activity.RESULT_OK);

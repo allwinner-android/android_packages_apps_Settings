@@ -47,6 +47,6 @@
         android:layout_marginEnd="16dp"
         android:text="@string/wizard_next"
         android:textColor="@android:color/white"
-        android:backgroundTint="@color/storage_wizard_button" />
+        android:backgroundTint="@color/storage_wizard_button_red" />
 
 </LinearLayout>

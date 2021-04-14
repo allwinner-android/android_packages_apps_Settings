@@ -250,7 +250,7 @@
     <item msgid="7674458294386319722">"修改日历"</item>
     <item msgid="8281201165558093009">"WLAN扫描"</item>
     <item msgid="8694611243479480497">"通知"</item>
-    <item msgid="7776439107987345446">"手机网络扫描"</item>
+    <item msgid="7776439107987345446">"机顶盒网络扫描"</item>
     <item msgid="514615766544675057">"拨打电话"</item>
     <item msgid="8181415497109310680">"读取短信"</item>
     <item msgid="6816551144382117307">"编写短信"</item>
@@ -289,7 +289,7 @@
     <item msgid="7155384795265164395">"写入壁纸"</item>
     <item msgid="1835836196806147034">"辅助结构"</item>
     <item msgid="5989890403088155055">"辅助屏幕截图"</item>
-    <item msgid="8582699692765917557">"读取手机状态"</item>
+    <item msgid="8582699692765917557">"读取机顶盒状态"</item>
     <item msgid="1474039653814954902">"添加语音邮件"</item>
     <item msgid="7222837656938871633">"使用 SIP"</item>
     <item msgid="6108267038969274380">"处理拨出电话"</item>
@@ -355,7 +355,7 @@
     <item msgid="1662979573471871926">"写入壁纸"</item>
     <item msgid="5964768335278263478">"辅助结构"</item>
     <item msgid="2657138701132782702">"辅助屏幕截图"</item>
-    <item msgid="8571369610363539266">"读取手机状态"</item>
+    <item msgid="8571369610363539266">"读取机顶盒状态"</item>
     <item msgid="4542463358215230845">"添加语音邮件"</item>
     <item msgid="864565065016166003">"使用 SIP"</item>
     <item msgid="1958009349883195116">"处理拨出电话"</item>
@@ -472,4 +472,18 @@
     <item msgid="4608643045752965568">"粉红色"</item>
     <item msgid="6131821495505931173">"红色"</item>
   </string-array>
+  <string-array name="pip_screen_set_postion_name">
+    <item>左上</item>
+    <item>右上</item>
+    <item>中间</item>
+    <item>左下</item>
+    <item>右下</item>
+  </string-array>
+  <string-array name="pip_screen_set_postion_value">
+     <item>0</item>
+     <item>1</item>
+     <item>2</item>
+     <item>3</item>
+     <item>4</item>
+   </string-array>
 </resources>

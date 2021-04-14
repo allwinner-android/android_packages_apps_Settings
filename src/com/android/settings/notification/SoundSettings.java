@@ -51,6 +51,7 @@ import android.support.v7.preference.TwoStatePreference;
 import android.text.TextUtils;
 import android.util.Log;
 
+
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settings.R;
 import com.android.settings.RingtonePreference;
@@ -84,6 +85,8 @@ public class SoundSettings extends SettingsPreferenceFragment implements Indexab
     private static final String KEY_WIFI_DISPLAY = "wifi_display";
     private static final String KEY_ZEN_MODE = "zen_mode";
     private static final String KEY_CELL_BROADCAST_SETTINGS = "cell_broadcast_settings";
+    private static final String KEY_AUDIO_OUTPUT_MODE = "audio_output_mode";
+    private static final String KEY_ENABLE_PASS_THROUGH = "enable_pass_through";
 
     private static final String SELECTED_PREFERENCE_KEY = "selected_preference";
     private static final int REQUEST_CODE = 200;
@@ -120,6 +123,9 @@ public class SoundSettings extends SettingsPreferenceFragment implements Indexab
     private PackageManager mPm;
     private UserManager mUserManager;
     private RingtonePreference mRequestPreference;
+    private Preference mAudioOutputPreference;
+    private AudioChannelsSelect mAudioSelector;
+    private TwoStatePreference mEnablePassThrough;
 
     @Override
     protected int getMetricsCategory() {
@@ -187,6 +193,17 @@ public class SoundSettings extends SettingsPreferenceFragment implements Indexab
                 mRequestPreference = (RingtonePreference) findPreference(selectedPreference);
             }
         }
+	removePreference(KEY_ALARM_VOLUME);
+	removePreference(KEY_RING_VOLUME);
+	removePreference(KEY_ALARM_RINGTONE);
+	removePreference(KEY_VIBRATE_WHEN_RINGING);
+	removePreference(KEY_PHONE_RINGTONE);
+	removePreference(KEY_ZEN_MODE);
+        mAudioOutputPreference = findPreference(KEY_AUDIO_OUTPUT_MODE);
+        mAudioSelector = new AudioChannelsSelect(getActivity());
+        mEnablePassThrough = (TwoStatePreference) findPreference(KEY_ENABLE_PASS_THROUGH);
+        mEnablePassThrough.setChecked(Settings.System.getInt(getContentResolver(),
+                Settings.System.ENABLE_PASS_THROUGH, 0) != 0);
     }
 
     @Override
@@ -235,6 +252,16 @@ public class SoundSettings extends SettingsPreferenceFragment implements Indexab
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
+        if (preference == mEnablePassThrough) {
+            Log.d(TAG, "passthrough.");
+            Settings.System.putInt(getContentResolver(), Settings.System.ENABLE_PASS_THROUGH,
+                mEnablePassThrough.isChecked() ? 1 : 0);
+            return true;
+        }
+        if (preference == mAudioOutputPreference) {
+            mAudioSelector.showChannelsSelectDialog();
+            return true;
+        }
         if (preference instanceof RingtonePreference) {
             mRequestPreference = (RingtonePreference) preference;
             mRequestPreference.onPrepareRingtonePickerIntent(mRequestPreference.getIntent());

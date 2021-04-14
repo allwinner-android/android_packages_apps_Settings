@@ -695,8 +695,8 @@ public class WifiConfigController implements TextWatcher,
             staticIpConfiguration.ipAddress = new LinkAddress(inetAddr, networkPrefixLength);
         } catch (NumberFormatException e) {
             // Set the hint as default after user types in ip address
-            mNetworkPrefixLengthView.setText(mConfigUi.getContext().getString(
-                    R.string.wifi_network_prefix_length_hint));
+            //mNetworkPrefixLengthView.setText(mConfigUi.getContext().getString(
+            //        R.string.wifi_network_prefix_length_hint));
         } catch (IllegalArgumentException e) {
             return R.string.wifi_ip_settings_invalid_ip_address;
         }
@@ -708,10 +708,11 @@ public class WifiConfigController implements TextWatcher,
                 InetAddress netPart = NetworkUtils.getNetworkPart(inetAddr, networkPrefixLength);
                 byte[] addr = netPart.getAddress();
                 addr[addr.length - 1] = 1;
-                mGatewayView.setText(InetAddress.getByAddress(addr).getHostAddress());
+                //mGatewayView.setText(InetAddress.getByAddress(addr).getHostAddress());
             } catch (RuntimeException ee) {
-            } catch (java.net.UnknownHostException u) {
             }
+            //catch (java.net.UnknownHostException u) {
+            //}
         } else {
             InetAddress gatewayAddr = getIPv4Address(gateway);
             if (gatewayAddr == null) {
@@ -728,7 +729,7 @@ public class WifiConfigController implements TextWatcher,
 
         if (TextUtils.isEmpty(dns)) {
             //If everything else is valid, provide hint as a default option
-            mDns1View.setText(mConfigUi.getContext().getString(R.string.wifi_dns1_hint));
+            //mDns1View.setText(mConfigUi.getContext().getString(R.string.wifi_dns1_hint));
         } else {
             dnsAddr = getIPv4Address(dns);
             if (dnsAddr == null) {

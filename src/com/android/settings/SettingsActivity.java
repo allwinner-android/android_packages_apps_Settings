@@ -35,6 +35,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.SystemProperties;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceManager;
@@ -124,6 +125,8 @@ import com.android.settings.wifi.WifiAPITest;
 import com.android.settings.wifi.WifiInfo;
 import com.android.settings.wifi.WifiSettings;
 import com.android.settings.wifi.p2p.WifiP2pSettings;
+import com.android.settings.ethernet.EthernetSettings;
+import com.android.settings.pppoe.PppoeSettings;
 import com.android.settingslib.drawer.DashboardCategory;
 import com.android.settingslib.drawer.SettingsDrawerActivity;
 import com.android.settingslib.drawer.Tile;
@@ -228,6 +231,8 @@ public class SettingsActivity extends SettingsDrawerActivity
     private String[] SETTINGS_FOR_RESTRICTED = {
             //wireless_section
             WifiSettingsActivity.class.getName(),
+            Settings.EthernetSettingsActivity.class.getName(),
+            Settings.PppoeSettingsActivity.class.getName(),
             Settings.BluetoothSettingsActivity.class.getName(),
             Settings.DataUsageSummaryActivity.class.getName(),
             Settings.SimSettingsActivity.class.getName(),
@@ -236,6 +241,7 @@ public class SettingsActivity extends SettingsDrawerActivity
             Settings.HomeSettingsActivity.class.getName(),
             Settings.SoundSettingsActivity.class.getName(),
             Settings.DisplaySettingsActivity.class.getName(),
+	    Settings.HDRSettingsActivity.class.getName(),
             Settings.StorageSettingsActivity.class.getName(),
             Settings.ManageApplicationsActivity.class.getName(),
             Settings.PowerUsageSummaryActivity.class.getName(),
@@ -345,8 +351,14 @@ public class SettingsActivity extends SettingsDrawerActivity
             TestingSettings.class.getName(),
             WifiAPITest.class.getName(),
             WifiInfo.class.getName(),
+            EthernetSettings.class.getName(),
+            PppoeSettings.class.getName(),
+	    HDRSettings.class.getName()
     };
 
+    private static final String ACTION_USBBTDEV_CHANGE = "action.android.usbbt.change";
+
+    private String[] btModuleList = {"ap6210", "ap6330", "ap6335", "rtl8723bs", "ap6212", "rtl8723bu", "ap6356s", "ap6255"};
 
     private static final String[] LIKE_SHORTCUT_INTENT_ACTION_ARRAY = {
             "android.settings.APPLICATION_DETAILS_SETTINGS"
@@ -378,6 +390,16 @@ public class SettingsActivity extends SettingsDrawerActivity
             if (action.equals(Intent.ACTION_USER_ADDED)
                     || action.equals(Intent.ACTION_USER_REMOVED)) {
                 Index.getInstance(getApplicationContext()).update();
+            }
+        }
+    };
+
+    private BroadcastReceiver mUSBBTReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(ACTION_USBBTDEV_CHANGE)) {
+                updateTilesList();
             }
         }
     };
@@ -634,6 +656,7 @@ public class SettingsActivity extends SettingsDrawerActivity
         mSwitchBar = (SwitchBar) findViewById(R.id.switch_bar);
         if (mSwitchBar != null) {
             mSwitchBar.setMetricsTag(getMetricsTag());
+	    mSwitchBar.requestFocus();
         }
 
         // see if we should show Back/Next buttons
@@ -813,6 +836,7 @@ public class SettingsActivity extends SettingsDrawerActivity
         registerReceiver(mBatteryInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         registerReceiver(mUserAddRemoveReceiver, new IntentFilter(Intent.ACTION_USER_ADDED));
         registerReceiver(mUserAddRemoveReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
+        registerReceiver(mUSBBTReceiver, new IntentFilter(ACTION_USBBTDEV_CHANGE));
 
         mDynamicIndexableContentMonitor.register(this, LOADER_ID_INDEXABLE_CONTENT_MONITOR);
 
@@ -827,6 +851,7 @@ public class SettingsActivity extends SettingsDrawerActivity
         super.onStop();
         unregisterReceiver(mBatteryInfoReceiver);
         unregisterReceiver(mUserAddRemoveReceiver);
+        unregisterReceiver(mUSBBTReceiver);
         mDynamicIndexableContentMonitor.unregister();
     }
 
@@ -1038,6 +1063,31 @@ public class SettingsActivity extends SettingsDrawerActivity
         });
     }
 
+    private boolean hasBluetooth() {
+        PackageManager pm = getPackageManager();
+        if (!(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)))
+            return false;
+
+        String str = SystemProperties.get("wlan.hardware.info", "null");
+
+        if ((str != null) && (!str.equals("null"))) {
+            String[] val = str.split(":");
+            if ((val != null) && (val.length > 1) && (val[1] != null)) {
+                for (String s : btModuleList) {
+                    if ((val[1]).equals(s)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        str = SystemProperties.get("sys.usbbt.inserted", "0");
+        if (str.equals("1"))
+            return true;
+
+        return false;
+    }
+
     private void doUpdateTilesList() {
         PackageManager pm = getPackageManager();
         final UserManager um = UserManager.get(this);
@@ -1048,8 +1098,20 @@ public class SettingsActivity extends SettingsDrawerActivity
                 pm.hasSystemFeature(PackageManager.FEATURE_WIFI), isAdmin, pm);
 
         setTileEnabled(new ComponentName(packageName,
+                Settings.EthernetSettingsActivity.class.getName()),
+                pm.hasSystemFeature(PackageManager.FEATURE_ETHERNET), isAdmin, pm);
+        setTileEnabled(new ComponentName(packageName,
+                Settings.PppoeSettingsActivity.class.getName()),
+                pm.hasSystemFeature(PackageManager.FEATURE_PPPOE), isAdmin, pm);
+
+        setTileEnabled(new ComponentName(packageName,
+                Settings.HDRSettingsActivity.class.getName()),
+                true, isAdmin, pm);
+
+
+        setTileEnabled(new ComponentName(packageName,
                 Settings.BluetoothSettingsActivity.class.getName()),
-                pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH), isAdmin, pm);
+                hasBluetooth(), isAdmin, pm);
 
         setTileEnabled(new ComponentName(packageName,
                 Settings.DataUsageSummaryActivity.class.getName()),
@@ -1061,7 +1123,7 @@ public class SettingsActivity extends SettingsDrawerActivity
 
         setTileEnabled(new ComponentName(packageName,
                 Settings.PowerUsageSummaryActivity.class.getName()),
-                mBatteryPresent, isAdmin, pm);
+                false, isAdmin, pm);
 
         setTileEnabled(new ComponentName(packageName,
                 Settings.UserSettingsActivity.class.getName()),

@@ -188,6 +188,11 @@ public class Status extends SettingsPreferenceFragment {
             mWimaxMacAddress = null;
         }
 
+        if(true){
+	    removePreferenceFromScreen(KEY_BATTERY_LEVEL);
+            removePreferenceFromScreen(KEY_BATTERY_STATUS);
+	}
+
         mConnectivityIntentFilter = new IntentFilter();
         for (String intent: CONNECTIVITY_INTENTS) {
              mConnectivityIntentFilter.addAction(intent);

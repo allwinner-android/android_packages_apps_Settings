@@ -246,8 +246,8 @@ public class PrivacySettings extends SettingsPreferenceFragment implements Index
                                     R.string.backup_configure_account_default_summary));
                         }
                     } else {
-                        mSummaryLoader.setSummary(this, mContext.getString(
-                                R.string.backup_disabled));
+                        /*mSummaryLoader.setSummary(this, mContext.getString(
+                                R.string.backup_disabled));*/
                     }
                 } catch (RemoteException e) {
                 }

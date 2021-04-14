@@ -439,6 +439,8 @@ public final class BluetoothSettings extends DeviceListPreferenceFragment implem
         // discoverability to be set again
         if (BluetoothAdapter.STATE_ON == bluetoothState)
             mInitiateDiscoverable = true;
+        setDeviceListGroup(getPreferenceScreen());
+        removeAllDevices();
         updateContent(bluetoothState);
     }
 

@@ -179,6 +179,11 @@ public abstract class DeviceListPreferenceFragment extends
         String key = cachedDevice.getDevice().getAddress();
         BluetoothDevicePreference preference = (BluetoothDevicePreference) getCachedPreference(key);
 
+		if(preference != null) {
+			mDeviceListGroup.removePreference(preference);
+			preference = null;
+		}
+
         if (preference == null) {
             preference = new BluetoothDevicePreference(getPrefContext(), cachedDevice);
             preference.setKey(key);
