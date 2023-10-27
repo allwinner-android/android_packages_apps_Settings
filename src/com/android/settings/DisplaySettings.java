@@ -29,6 +29,11 @@ import com.android.settings.display.ShowOperatorNamePreferenceController;
 import com.android.settings.display.TapToWakePreferenceController;
 import com.android.settings.display.ThemePreferenceController;
 import com.android.settings.display.VrDisplayPreferenceController;
+import com.android.settings.display.AwColorTemperaturePreferenceController;
+import com.android.settings.display.AwEnhanceModePreferenceController;
+import com.android.settings.display.AwDisplayPreferenceController;
+import com.android.settings.display.AwSmartBacklightPreferenceController;
+import com.android.settings.display.awdisplay.AwEinkRefreshModePreferenceController;
 import com.android.settings.search.BaseSearchIndexProvider;
 import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.lifecycle.Lifecycle;
@@ -82,6 +87,13 @@ public class DisplaySettings extends DashboardFragment {
         controllers.add(new ShowOperatorNamePreferenceController(context));
         controllers.add(new ThemePreferenceController(context));
         controllers.add(new BrightnessLevelPreferenceController(context, lifecycle));
+        controllers.add(new AwDisplayPreferenceController(context));
+        controllers.add(new AwEnhanceModePreferenceController(context));
+        controllers.add(new AwSmartBacklightPreferenceController(context));
+        controllers.add(new AwColorTemperaturePreferenceController(context));
+        /// AW CODE：[feat] add fresh mode for eink screen
+        controllers.add(new AwEinkRefreshModePreferenceController(context));
+        /// AW:add end
         return controllers;
     }
 

@@ -36,7 +36,7 @@ public class BasebandVersionPreferenceController extends BasePreferenceControlle
 
     @Override
     public int getAvailabilityStatus() {
-        return !Utils.isWifiOnly(mContext) ? AVAILABLE : UNSUPPORTED_ON_DEVICE;
+        return Utils.mRadioAvailable ? AVAILABLE : UNSUPPORTED_ON_DEVICE;
     }
 
     @Override

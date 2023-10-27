@@ -48,8 +48,8 @@ public class ParentalConsentHelper {
     private static final String KEY_FINGERPRINT_CONSENT = "fingerprint";
     private static final String KEY_IRIS_CONSENT = "iris";
 
-    private final boolean mRequireFace;
-    private final boolean mRequireFingerprint;
+    private boolean mRequireFace;
+    private boolean mRequireFingerprint;
 
     private long mGkPwHandle;
     @Nullable
@@ -60,15 +60,19 @@ public class ParentalConsentHelper {
     /**
      * Helper for aggregating user consent.
      *
-     * @param requireFace if face consent should be shown
-     * @param requireFingerprint if fingerprint consent should be shown
      * @param gkPwHandle for launched intents
      */
-    public ParentalConsentHelper(boolean requireFace, boolean requireFingerprint,
-            @Nullable Long gkPwHandle) {
+    public ParentalConsentHelper(@Nullable Long gkPwHandle) {
+        mGkPwHandle = gkPwHandle != null ? gkPwHandle : 0L;
+    }
+
+    /**
+     * @param requireFace if face consent should be shown
+     * @param requireFingerprint if fingerprint consent should be shown
+     */
+    public void setConsentRequirement(boolean requireFace, boolean requireFingerprint) {
         mRequireFace = requireFace;
         mRequireFingerprint = requireFingerprint;
-        mGkPwHandle = gkPwHandle != null ? gkPwHandle : 0L;
     }
 
     /**

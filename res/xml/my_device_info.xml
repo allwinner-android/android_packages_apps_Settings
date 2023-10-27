@@ -124,6 +124,14 @@
             settings:enableCopying="true"
             settings:controller="com.android.settings.deviceinfo.imei.ImeiInfoPreferenceController"/>
 
+        <!-- Version number-->
+        <Preference
+            android:key="version_number"
+            android:order="42"
+            android:title="@string/version_number"
+            android:selectable="true"
+            android:summary="@string/summary_placeholder"/>
+
         <!-- Android version -->
         <Preference
             android:key="firmware_version"

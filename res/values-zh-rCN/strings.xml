@@ -1477,6 +1477,7 @@
     <string name="system_update_settings_list_item_title" msgid="3398346836439366350">"系统更新"</string>
     <string name="system_update_settings_list_item_summary" msgid="6703752298349642101"></string>
     <string name="firmware_version" msgid="1606901586501447275">"Android 版本"</string>
+    <string name="version_number">"版本号"</string>
     <string name="security_patch" msgid="4071756145347865382">"Android 安全更新"</string>
     <string name="model_info" msgid="8997566254717810904">"型号"</string>
     <string name="hardware_info" msgid="7035211991066637019">"型号和硬件"</string>
@@ -1766,6 +1767,9 @@
     <string name="main_clear_not_available" msgid="3433795327146684827">"此用户无权恢复出厂设置"</string>
     <string name="main_clear_progress_title" msgid="7239741132015617719">"正在清除"</string>
     <string name="main_clear_progress_text" msgid="4636695115176327972">"请稍候…"</string>
+    <string name="reboot_recovery_title">Recovery模式</string>
+    <string name="reboot_recovery_desc">现在重启进入recovery?</string>
+    <string name="reboot_recovery_button">立即重启</string>
     <string name="call_settings_title" msgid="2531072044177194164">"通话设置"</string>
     <string name="call_settings_summary" msgid="8244293779053318053">"设置语音信箱、来电转接、来电等待和本机号码显示"</string>
     <string name="tether_settings_title_usb" msgid="5926474044238409099">"USB 网络共享"</string>
@@ -2089,7 +2093,7 @@
     <string name="internal_storage" msgid="999496851424448809">"内部存储空间"</string>
     <string name="recompute_size" msgid="1098091228370999128">"正在重新计算大小..."</string>
     <string name="clear_data_dlg_title" msgid="180446967743732410">"要删除应用数据吗？"</string>
-    <string name="clear_data_dlg_text" msgid="7870723948123690332">"系统会永久删除此应用的所有数据。删除的内容包括所有文件、设置、帐号、数据库等。"</string>
+    <string name="clear_data_dlg_text" msgid="1107610960337399006">"系统将永久删除此应用的数据，其中包括文件、设置、数据库和其他应用数据。"</string>
     <string name="dlg_ok" msgid="1421350367857960997">"确定"</string>
     <string name="dlg_cancel" msgid="5164705061530774899">"取消"</string>
     <string name="app_not_found_dlg_title" msgid="7122106240981109930"></string>

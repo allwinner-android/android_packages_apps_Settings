@@ -61,7 +61,7 @@ public class ResetDashboardFragment extends DashboardFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        use(EraseEuiccDataController.class).setFragment(this);
+        //use(EraseEuiccDataController.class).setFragment(this);
     }
 
     private static List<AbstractPreferenceController> buildPreferenceControllers(Context context,
@@ -70,6 +70,7 @@ public class ResetDashboardFragment extends DashboardFragment {
         controllers.add(new NetworkResetPreferenceController(context));
         controllers.add(new FactoryResetPreferenceController(context));
         controllers.add(new ResetAppPrefPreferenceController(context, lifecycle));
+        controllers.add(new RebootRecoveryPreferenceController(context));
         return controllers;
     }
 

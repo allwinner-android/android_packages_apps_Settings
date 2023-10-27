@@ -19,16 +19,25 @@ import static com.android.settings.network.MobilePlanPreferenceController.MANAGE
 
 import android.app.Dialog;
 import android.app.settings.SettingsEnums;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.provider.SearchIndexableResource;
 import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
 
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.settings.R;
 import com.android.settings.Utils;
+import com.android.settings.core.FeatureFlags;
 import com.android.settings.dashboard.DashboardFragment;
 import com.android.settings.network.MobilePlanPreferenceController.MobilePlanPreferenceHost;
 import com.android.settings.search.BaseSearchIndexProvider;
@@ -47,6 +56,58 @@ public class NetworkDashboardFragment extends DashboardFragment implements
         MobilePlanPreferenceHost {
 
     private static final String TAG = "NetworkDashboardFrag";
+    private static final String KEY_MOBILE_NETWORK_SETTINGS = "mobile_network_list";
+    private static final String KEY_MANAGE_MOBILE_PLAN = "manage_mobile_plan";
+    private Preference mMobileNetworkSettings;
+    private Preference mManageMobilePlan;
+
+    private BroadcastReceiver mRadioStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
+                if (SystemProperties.get("gsm.sim.state").equals("LOADED")) {
+                    if (mMobileNetworkSettings != null)
+                        getPreferenceScreen().addPreference(mMobileNetworkSettings);
+
+                    if (mManageMobilePlan != null)
+                        getPreferenceScreen().addPreference(mManageMobilePlan);
+                } else {
+                    if (mMobileNetworkSettings != null)
+                        getPreferenceScreen().removePreference(mMobileNetworkSettings);
+
+                    if (mManageMobilePlan != null)
+                        getPreferenceScreen().removePreference(mManageMobilePlan);
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mMobileNetworkSettings = findPreference(KEY_MOBILE_NETWORK_SETTINGS);
+        mManageMobilePlan = findPreference(KEY_MANAGE_MOBILE_PLAN);
+        if (!Utils.mRadioAvailable) {
+            if (mMobileNetworkSettings != null)
+                getPreferenceScreen().removePreference(mMobileNetworkSettings);
+            if (mManageMobilePlan != null)
+                getPreferenceScreen().removePreference(mManageMobilePlan);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getContext().registerReceiver(mRadioStateReceiver,
+                new IntentFilter(TelephonyIntents.ACTION_SIM_STATE_CHANGED));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getContext().unregisterReceiver(mRadioStateReceiver);
+    }
 
     @Override
     public int getMetricsCategory() {
@@ -111,6 +172,8 @@ public class NetworkDashboardFragment extends DashboardFragment implements
                         ? new InternetPreferenceController(context, lifecycle)
                         : null;
 
+        final MobileNetworkPreferenceController mobileNetworkPreferenceController =
+                new MobileNetworkPreferenceController(context);
         final VpnPreferenceController vpnPreferenceController =
                 new VpnPreferenceController(context);
         final PrivateDnsPreferenceController privateDnsPreferenceController =
@@ -121,6 +184,7 @@ public class NetworkDashboardFragment extends DashboardFragment implements
             if (wifiPreferenceController != null) {
                 lifecycle.addObserver(wifiPreferenceController);
             }
+            lifecycle.addObserver(mobileNetworkPreferenceController);
             lifecycle.addObserver(vpnPreferenceController);
             lifecycle.addObserver(privateDnsPreferenceController);
         }
@@ -128,6 +192,7 @@ public class NetworkDashboardFragment extends DashboardFragment implements
         final List<AbstractPreferenceController> controllers = new ArrayList<>();
 
         controllers.add(new MobileNetworkSummaryController(context, lifecycle));
+        controllers.add(mobileNetworkPreferenceController);
         controllers.add(new TetherPreferenceController(context, lifecycle));
         controllers.add(vpnPreferenceController);
         controllers.add(new ProxyPreferenceController(context));

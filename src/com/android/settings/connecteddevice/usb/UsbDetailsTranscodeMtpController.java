@@ -91,7 +91,8 @@ public class UsbDetailsTranscodeMtpController extends UsbDetailsController
     }
 
     private static boolean isDeviceInFileTransferMode(long functions, int dataRole) {
-        return dataRole == DATA_ROLE_DEVICE && ((functions & UsbManager.FUNCTION_MTP) != 0
-                || (functions & UsbManager.FUNCTION_PTP) != 0);
+        //return dataRole == DATA_ROLE_DEVICE && ((functions & UsbManager.FUNCTION_MTP) != 0
+        //        || (functions & UsbManager.FUNCTION_PTP) != 0);
+        return false;
     }
 }

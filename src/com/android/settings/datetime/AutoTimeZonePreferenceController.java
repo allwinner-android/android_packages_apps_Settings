@@ -17,6 +17,7 @@
 package com.android.settings.datetime;
 
 import android.content.Context;
+import android.os.SystemProperties;
 import android.provider.Settings;
 
 import androidx.preference.Preference;
@@ -43,7 +44,8 @@ public class AutoTimeZonePreferenceController extends AbstractPreferenceControll
 
     @Override
     public boolean isAvailable() {
-        return !(Utils.isWifiOnly(mContext) || mIsFromSUW);
+        boolean mWifiOnly = SystemProperties.getBoolean("ro.radio.noril", false);
+        return !(Utils.isWifiOnly(mContext) || mIsFromSUW || mWifiOnly);
     }
 
     @Override

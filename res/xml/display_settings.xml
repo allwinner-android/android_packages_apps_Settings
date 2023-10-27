@@ -59,6 +59,16 @@
     <PreferenceCategory
         android:title="@string/category_name_appearance">
 
+        <!-- AW CODE：[feat] add fresh mode for eink screen -->
+        <com.android.settings.display.awdisplay.AwEinkRefreshModeListPreference
+            android:key="eink_refresh_mode"
+            android:title="@string/eink_refresh_mode"
+            android:summary="@string/summary_placeholder"
+            android:entries="@array/eink_refresh_mode"
+            android:entryValues="@array/eink_refresh_mode"
+            settings:keywords="@string/keywords_eink_refresh_mode" />
+        <!-- AW:add end -->
+
         <com.android.settings.display.darkmode.DarkModePreference
             android:key="dark_ui_mode"
             android:title="@string/dark_ui_mode"
@@ -155,4 +165,71 @@
             android:title="@string/display_vr_pref_title"
             android:fragment="com.android.settings.display.VrDisplayPreferencePicker"/>
     </PreferenceCategory>
+
+    <PreferenceCategory android:key="second_screen_setting"
+        android:title="@string/second_screen_setting">
+        <ListPreference
+            android:key="second_screen_output_mode"
+            android:title="@string/second_screen_output_mode"
+            android:summary="@string/second_screen_output_mode_summary"
+            android:entries="@array/hdmi_output_mode_entries"
+            android:entryValues="@array/hdmi_output_mode_values" />
+        <SwitchPreference
+            android:key="hdmi_fullscreen"
+            android:title="@string/hdmi_fullscreen"
+            android:summary="@string/hdmi_fullscreen_summary" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="second_screen_width_scale"
+            android:title="@string/second_screen_width_scale" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="second_screen_height_scale"
+            android:title="@string/second_screen_height_scale" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="enhance_mode_setting"
+        android:title="@string/color_enhance">
+        <SwitchPreference
+            android:key="enhance_mode"
+            android:title="@string/color_enhance"
+            android:summary="@string/color_enhance_summary" />
+        <SwitchPreference
+            android:key="enhance_mode_demo"
+            android:title="@string/color_enhance_demo"
+            android:summary="@string/color_enhance_demo_summary" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="color_bright_setting"
+            android:title="@string/color_bright_setting" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="contrast_setting"
+            android:title="@string/contrast_setting" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="saturation_setting"
+            android:title="@string/saturation_setting" />
+        <SwitchPreference
+            android:key="black_white_mode"
+            android:title="@string/black_white_mode"
+            android:summary="@string/black_white_mode_summary"/>
+        </PreferenceCategory>
+    <PreferenceCategory android:key="smart_backlight_setting"
+        android:title="@string/smart_backlight">
+        <SwitchPreference
+            android:key="smart_backlight"
+            android:title="@string/smart_backlight"
+            android:summary="@string/smart_backlight_summary"/>
+        <SwitchPreference
+            android:key="smart_backlight_demo"
+            android:title="@string/smart_backlight_demo"
+            android:summary="@string/smart_backlight_demo_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:key="color_temperature_setting"
+        android:title="@string/color_temperature_scale">
+        <SwitchPreference
+            android:key="reading_mode"
+            android:title="@string/reading_mode" />
+        <com.android.settings.widget.SeekBarPreference
+            android:key="color_temperature_scale"
+            android:title="@string/color_temperature_scale" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

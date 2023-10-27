@@ -134,6 +134,10 @@ public final class Utils extends com.android.settingslib.Utils {
 
     public static final String OS_PKG = "os";
 
+    public static boolean mRadioAvailable = false;
+
+    public static String mRadioState = "off";
+
     /**
      * Whether to disable the new device identifier access restrictions.
      */

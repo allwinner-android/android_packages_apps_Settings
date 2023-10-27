@@ -70,6 +70,13 @@ public class ScreenTimeoutPreferenceController extends BasePreferenceController 
     private CharSequence getTimeoutSummary(long maxTimeout) {
         final long currentTimeout = getCurrentScreenTimeout();
         final CharSequence description = getTimeoutDescription(currentTimeout, maxTimeout);
+        /// AW CODE:[feat] support never timeout
+        if (description != null && description.length() != 0) {
+            if (!Character.isDigit(description.charAt(0))) {
+                return mContext.getString(R.string.screen_timeout_summary_never);
+            }
+        }
+        /// AW: add end
         return mContext.getString(R.string.screen_timeout_summary, description);
     }
 

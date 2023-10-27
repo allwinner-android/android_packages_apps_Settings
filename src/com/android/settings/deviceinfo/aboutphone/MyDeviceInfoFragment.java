@@ -24,6 +24,11 @@ import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.view.View;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
+import androidx.preference.PreferenceScreen;
 
 import com.android.settings.R;
 import com.android.settings.Utils;
@@ -33,6 +38,7 @@ import com.android.settings.deviceinfo.BuildNumberPreferenceController;
 import com.android.settings.deviceinfo.DeviceNamePreferenceController;
 import com.android.settings.deviceinfo.FccEquipmentIdPreferenceController;
 import com.android.settings.deviceinfo.FeedbackPreferenceController;
+import com.android.settings.deviceinfo.VersionNumberPreferenceController;
 import com.android.settings.deviceinfo.IpAddressPreferenceController;
 import com.android.settings.deviceinfo.ManualPreferenceController;
 import com.android.settings.deviceinfo.RegulatoryInfoPreferenceController;
@@ -47,6 +53,8 @@ import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.search.SearchIndexable;
 import com.android.settingslib.widget.LayoutPreference;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.PhoneConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +65,48 @@ public class MyDeviceInfoFragment extends DashboardFragment
 
     private static final String LOG_TAG = "MyDeviceInfoFragment";
     private static final String KEY_MY_DEVICE_INFO_HEADER = "my_device_info_header";
+    private static final String KEY_SIM_STATUS = "sim_status";
+    private static final String KEY_IMEI_INFO = "imei_info";
+    private static final String KEY_PREFERENCE_CATEGORY = "device_detail_category";
 
+    private Preference mSimstatus = null;
+    private Preference mImeiinfo = null;
     private BuildNumberPreferenceController mBuildNumberPreferenceController;
+
+    private BroadcastReceiver mRadioStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Utils.mRadioState = intent.getStringExtra(PhoneConstants.STATE_KEY);
+            if (TelephonyIntents.ACTION_RADIO_STATE_CHANGED.equals(action)) {
+                Utils.mRadioAvailable = Utils.mRadioState.equals("on");
+                if (Utils.mRadioAvailable) {
+                    final PreferenceCategory category = getPreferenceScreen().findPreference(KEY_PREFERENCE_CATEGORY);
+                    if (findPreference(KEY_SIM_STATUS) == null)
+                        category.addPreference(mSimstatus);
+                    if (findPreference(KEY_IMEI_INFO) == null)
+                        category.addPreference(mImeiinfo);
+                } else {
+                    if (findPreference(KEY_SIM_STATUS) != null)
+                        removePreference(KEY_SIM_STATUS);
+                    if (findPreference(KEY_IMEI_INFO) != null)
+                        removePreference(KEY_IMEI_INFO);
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        mSimstatus = findPreference(KEY_SIM_STATUS);
+        mImeiinfo = findPreference(KEY_IMEI_INFO);
+        if (!Utils.mRadioAvailable) {
+            if (mSimstatus != null) removePreference(KEY_SIM_STATUS);
+            if (mImeiinfo != null) removePreference(KEY_IMEI_INFO);
+        }
+    }
+
 
     @Override
     public int getMetricsCategory() {
@@ -86,6 +134,19 @@ public class MyDeviceInfoFragment extends DashboardFragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        getContext().registerReceiver(mRadioStateReceiver,
+                new IntentFilter(TelephonyIntents.ACTION_RADIO_STATE_CHANGED));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getContext().unregisterReceiver(mRadioStateReceiver);
+    }
+
+    @Override
     protected String getLogTag() {
         return LOG_TAG;
     }
@@ -104,6 +165,7 @@ public class MyDeviceInfoFragment extends DashboardFragment
             Context context, MyDeviceInfoFragment fragment, Lifecycle lifecycle) {
         final List<AbstractPreferenceController> controllers = new ArrayList<>();
         controllers.add(new SimStatusPreferenceController(context, fragment));
+        controllers.add(new VersionNumberPreferenceController(context, lifecycle));
         controllers.add(new IpAddressPreferenceController(context, lifecycle));
         controllers.add(new WifiMacAddressPreferenceController(context, lifecycle));
         controllers.add(new BluetoothAddressPreferenceController(context, lifecycle));

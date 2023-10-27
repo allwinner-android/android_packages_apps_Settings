@@ -92,4 +92,14 @@
         android:title="@string/gesture_prevent_ringing_screen_title"
         android:fragment="com.android.settings.gestures.PreventRingingGestureSettings"
         settings:controller="com.android.settings.gestures.PreventRingingParentPreferenceController" />
+    <Preference
+        android:key="gesture_swipe_screenshot_summary"
+        android:title="@string/title_gesture_screenshot"
+        android:fragment="com.android.settings.gestures.SwipeScreenShotSettings"
+        settings:controller="com.android.settings.gestures.SwipeScreenShotPreferenceController" />
+    <Preference
+        android:key="gesture_swipe_screenrecord_summary"
+        android:title="@string/title_gesture_screenrecord"
+        android:fragment="com.android.settings.gestures.SwipeScreenRecordSettings"
+        settings:controller="com.android.settings.gestures.SwipeScreenRecordPreferenceController" />
 </PreferenceScreen>

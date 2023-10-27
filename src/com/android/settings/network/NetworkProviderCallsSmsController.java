@@ -19,6 +19,7 @@ package com.android.settings.network;
 import static androidx.lifecycle.Lifecycle.Event;
 
 import android.content.Context;
+import android.os.SystemProperties;
 import android.os.UserManager;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -181,6 +182,9 @@ public class NetworkProviderCallsSmsController extends AbstractPreferenceControl
 
     @Override
     public boolean isAvailable() {
+        boolean mWifiOnly = SystemProperties.getBoolean("ro.radio.noril", false);
+        if (mWifiOnly) return false;
+
         return mUserManager.isAdminUser();
     }
 

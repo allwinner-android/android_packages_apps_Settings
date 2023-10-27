@@ -995,6 +995,18 @@
                 android:value="com.android.settings.display.SmartAutoRotatePreferenceFragment" />
         </activity>
 
+        <service
+            android:name=".display.AwReadingModeTileService"
+            android:label="@string/reading_mode"
+            android:icon="@drawable/tile_icon_reading_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name="Settings$NightDisplaySettingsActivity"
             android:label="@string/night_display_title"
@@ -2202,6 +2214,7 @@
         </activity>
 
         <activity android:name=".bluetooth.BluetoothPairingDialog"
+                  android:permission="android.permission.BLUETOOTH_PRIVILEGED"
                   android:excludeFromRecents="true"
                   android:windowSoftInputMode="stateVisible|adjustResize"
                   android:theme="@style/Theme.AlertDialog"

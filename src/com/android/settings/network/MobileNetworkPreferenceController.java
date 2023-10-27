@@ -139,6 +139,10 @@ public class MobileNetworkPreferenceController extends AbstractPreferenceControl
             ((RestrictedPreference) preference).isDisabledByAdmin()) {
                 return;
         }
+
+        // add for RadioState is off
+        if (preference == null) return;
+
         preference.setEnabled(Settings.Global.getInt(
             mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) == 0);
     }
